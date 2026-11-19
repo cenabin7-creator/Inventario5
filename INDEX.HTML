@@ -1,0 +1,1271 @@
+<!index.html html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Control — Inventario</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --surface: #131c31;
+      --surface-2: #1b2742;
+      --border: #2a3a5e;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-dark: #0284c7;
+      --success: #22c55e;
+      --success-bg: rgba(34, 197, 94, 0.14);
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.14);
+      --warn: #f59e0b;
+      --warn-bg: rgba(245, 158, 11, 0.15);
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 84px;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(11, 17, 32, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), #6366f1);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 18px;
+      color: #081020;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 19px;
+      letter-spacing: -0.3px;
+    }
+
+    .brand small {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    button {
+      font-family: inherit;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.08s ease, opacity 0.15s ease;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    .btn-icon {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 11px;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #071324;
+      padding: 11px 14px;
+      font-size: 14px;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #052010;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .btn-ghost {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .area-tabs {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+
+    .area-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .area-tab {
+      flex: 0 0 auto;
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 8px 13px;
+      border-radius: 999px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .area-tab.active {
+      background: var(--primary);
+      color: #061322;
+      border-color: var(--primary);
+    }
+
+    main {
+      padding: 14px 16px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+    }
+
+    .stat-card small {
+      color: var(--muted);
+      font-size: 11px;
+      display: block;
+    }
+
+    .stat-card strong {
+      font-size: 20px;
+      display: block;
+      margin-top: 4px;
+    }
+
+    .quick-bar {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 11px 13px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+    }
+
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .item-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .item-card.low-stock {
+      border-color: rgba(239, 68, 68, 0.65);
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.08), var(--surface) 45%);
+    }
+
+    .item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .item-title {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .item-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 5px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .pill {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      color: var(--text);
+    }
+
+    .pill-warn {
+      background: var(--danger-bg);
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+    }
+
+    .stock-box {
+      text-align: right;
+      min-width: 84px;
+    }
+
+    .stock-num {
+      font-size: 21px;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .stock-unit {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .item-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 8px;
+    }
+
+    .history-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .badge-in {
+      background: var(--success-bg);
+      color: #86efac;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-out {
+      background: var(--danger-bg);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(11, 17, 32, 0.96);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+      z-index: 25;
+    }
+
+    .nav-btn {
+      background: transparent;
+      color: var(--muted);
+      padding: 6px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-size: 11px;
+      border-radius: 10px;
+    }
+
+    .nav-btn span.ico {
+      font-size: 18px;
+    }
+
+    .nav-btn.active {
+      color: var(--primary);
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 17, 0.8);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 460px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .modal h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .chip {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    .chip.selected {
+      background: var(--primary);
+      color: #061322;
+      border-color: var(--primary);
+    }
+
+    .qty-stepper {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 14px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+    }
+
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .section-card h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
+
+    .row-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    #reader {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="top-bar">
+      <div class="brand">
+        <div class="brand-badge">C</div>
+        <div>
+          <h1>Control</h1>
+          <small id="pinStatusLabel">Sin PIN activo</small>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-icon" onclick="openScanner()">📷 Escanear</button>
+        <button class="btn-primary" onclick="openItemModal()">+ Artículo</button>
+      </div>
+    </div>
+
+    <div class="area-tabs" id="areaTabs">
+      <button class="area-tab active" data-area="ALL" onclick="selectArea('ALL')">Todo</button>
+      <button class="area-tab" data-area="Almacén Artículos" onclick="selectArea('Almacén Artículos')">📦 Artículos</button>
+      <button class="area-tab" data-area="Despensa" onclick="selectArea('Despensa')">🫙 Despensa</button>
+      <button class="area-tab" data-area="Almacén Bebidas" onclick="selectArea('Almacén Bebidas')">🥤 Bebidas</button>
+    </div>
+  </header>
+
+  <main id="appContent"></main>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-tab="inventory" onclick="switchTab('inventory')">
+      <span class="ico">📋</span>
+      <span>Inventario</span>
+    </button>
+    <button class="nav-btn" data-tab="reorder" onclick="switchTab('reorder')">
+      <span class="ico">⚠️</span>
+      <span>Por Comprar</span>
+    </button>
+    <button class="nav-btn" data-tab="history" onclick="switchTab('history')">
+      <span class="ico">🕒</span>
+      <span>Historial</span>
+    </button>
+    <button class="nav-btn" data-tab="settings" onclick="switchTab('settings')">
+      <span class="ico">⚙️</span>
+      <span>Ajustes</span>
+    </button>
+  </nav>
+
+  <!-- Modal Movimiento Entrada / Salida -->
+  <div class="modal-backdrop" id="moveModal">
+    <div class="modal">
+      <h2 id="moveTitle">Movimiento</h2>
+      <p id="moveSubtitle" style="margin:0 0 12px;color:var(--muted);font-size:13px;"></p>
+      <div class="form-group">
+        <label>Cantidad a <span id="moveActionWord">sumar</span></label>
+        <input type="number" id="moveQty" step="any" min="0.01" value="1" />
+        <div class="qty-stepper" id="qtyQuickButtons"></div>
+      </div>
+      <div class="form-group">
+        <label>Motivo</label>
+        <div class="chips" id="reasonChips"></div>
+      </div>
+      <div class="form-group">
+        <label>Detalle adicional (opcional)</label>
+        <input type="text" id="moveNote" placeholder="Ej. Proveedor central, cocina tarde, botella rota..." />
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeModal('moveModal')">Cancelar</button>
+        <button id="confirmMoveBtn" class="btn-success" onclick="confirmMove()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Crear / Editar Artículo -->
+  <div class="modal-backdrop" id="itemModal">
+    <div class="modal">
+      <h2 id="itemModalTitle">Nuevo Artículo</h2>
+      <div class="form-group">
+        <label>Nombre del artículo</label>
+        <input type="text" id="itemName" placeholder="Ej. Refresco Cola 12oz, Arroz blanco, Vasos..." />
+      </div>
+      <div class="form-group">
+        <label>Área / Almacén</label>
+        <select id="itemArea">
+          <option value="Almacén Artículos">Almacén Artículos</option>
+          <option value="Despensa">Despensa</option>
+          <option value="Almacén Bebidas">Almacén Bebidas</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Unidad de medida</label>
+        <select id="itemUnit">
+          <option value="ud.">Unidad (ud.)</option>
+          <option value="caja">Caja (caja)</option>
+          <option value="bot.">Botella (bot.)</option>
+          <option value="lb">Libra (lb)</option>
+          <option value="kg">Kilo (kg)</option>
+          <option value="L">Litro (L)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Código QR / Barras (dejar vacío si no tiene código)</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="itemCode" placeholder="Opcional — se asignará SIN-XXXX si va vacío" />
+          <button type="button" class="btn-ghost" onclick="assignNoCode()">Sin código</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label id="itemStockLabel">Stock inicial</label>
+          <input type="number" id="itemStock" step="any" min="0" value="0" />
+        </div>
+        <div class="form-group">
+          <label>Stock mínimo (alerta)</label>
+          <input type="number" id="itemMin" step="any" min="0" value="5" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeModal('itemModal')">Cancelar</button>
+        <button class="btn-primary" onclick="saveItem()">Guardar artículo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Escáner -->
+  <div class="modal-backdrop" id="scanModal">
+    <div class="modal">
+      <h2>Escanear QR o Código de Barras</h2>
+      <div id="reader"></div>
+      <p id="scanHint" style="color:var(--muted);font-size:12px;margin:10px 0 0;">
+        Apunta la cámara al código. Si el artículo ya existe, abrirá Entrada/Salida; si es nuevo, te permitirá registrarlo.
+      </p>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeScanner()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal PIN -->
+  <div class="modal-backdrop" id="pinModal">
+    <div class="modal">
+      <h2 id="pinModalTitle">Verificar PIN</h2>
+      <p id="pinModalDesc" style="color:var(--muted);font-size:13px;margin:0 0 12px;"></p>
+      <div class="form-group">
+        <label>PIN de 4 dígitos</label>
+        <input type="password" id="pinInput" maxlength="4" inputmode="numeric" placeholder="••••" />
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeModal('pinModal')">Cancelar</button>
+        <button class="btn-primary" onclick="submitPinModal()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'control_app_data_v1';
+    const IN_REASONS = ['Compra / Proveedor', 'Reposición', 'Devolución', 'Ajuste inventario'];
+    const OUT_REASONS = ['Cocina / Producción', 'Barra / Servicio', 'Merma / Rotura', 'Consumo interno', 'Ajuste inventario'];
+
+    const defaultState = {
+      pin: '',
+      items: [
+        { id: '1', name: 'Refresco Cola 12oz', area: 'Almacén Bebidas', unit: 'caja', code: '750100000101', stock: 12, minStock: 4 },
+        { id: '2', name: 'Agua Embotellada 500ml', area: 'Almacén Bebidas', unit: 'bot.', code: '750100000102', stock: 3, minStock: 10 },
+        { id: '3', name: 'Arroz Blanco', area: 'Despensa', unit: 'lb', code: 'SIN-1001', stock: 25, minStock: 10 },
+        { id: '4', name: 'Aceite Vegetal', area: 'Despensa', unit: 'L', code: '750100000201', stock: 2, minStock: 4 },
+        { id: '5', name: 'Servilletas Mesa', area: 'Almacén Artículos', unit: 'caja', code: 'SIN-1002', stock: 8, minStock: 3 }
+      ],
+      history: []
+    };
+
+    let state = loadState();
+    let currentTab = 'inventory';
+    let currentArea = 'ALL';
+    let searchQuery = '';
+    let onlyNoCode = false;
+
+    let moveContext = null;
+    let selectedReason = '';
+    let editingItemId = null;
+    let pendingPinCallback = null;
+    let html5QrCode = null;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(defaultState);
+        const parsed = JSON.parse(raw);
+        return {
+          pin: parsed.pin || '',
+          items: Array.isArray(parsed.items) ? parsed.items : structuredClone(defaultState.items),
+          history: Array.isArray(parsed.history) ? parsed.history : []
+        };
+      } catch {
+        return structuredClone(defaultState);
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      updatePinHeader();
+    }
+
+    function updatePinHeader() {
+      const el = document.getElementById('pinStatusLabel');
+      el.textContent = state.pin ? '🔒 PIN de seguridad activo' : 'Sin PIN activo';
+    }
+
+    function requirePin(callback, title = 'PIN requerido', desc = 'Ingresa el PIN de 4 dígitos para continuar.') {
+      if (!state.pin) {
+        callback();
+        return;
+      }
+      pendingPinCallback = callback;
+      document.getElementById('pinModalTitle').textContent = title;
+      document.getElementById('pinModalDesc').textContent = desc;
+      document.getElementById('pinInput').value = '';
+      openModal('pinModal');
+      setTimeout(() => document.getElementById('pinInput').focus(), 80);
+    }
+
+    function submitPinModal() {
+      const entered = document.getElementById('pinInput').value.trim();
+      if (entered !== state.pin) {
+        alert('PIN incorrecto.');
+        return;
+      }
+      const cb = pendingPinCallback;
+      pendingPinCallback = null;
+      closeModal('pinModal');
+      if (cb) cb();
+    }
+
+    function selectArea(area) {
+      currentArea = area;
+      document.querySelectorAll('.area-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.area === area);
+      });
+      render();
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+      render();
+    }
+
+    function formatNum(n) {
+      return Number(n).toLocaleString('es', { maximumFractionDigits: 2 });
+    }
+
+    function getFilteredItems() {
+      return state.items.filter(item => {
+        const matchArea = currentArea === 'ALL' || item.area === currentArea;
+        const q = searchQuery.trim().toLowerCase();
+        const matchSearch = !q ||
+          item.name.toLowerCase().includes(q) ||
+          (item.code && item.code.toLowerCase().includes(q));
+        const matchNoCode = !onlyNoCode || item.code.startsWith('SIN-');
+        return matchArea && matchSearch && matchNoCode;
+      });
+    }
+
+    function render() {
+      updatePinHeader();
+      const container = document.getElementById('appContent');
+      if (currentTab === 'inventory') {
+        container.innerHTML = renderInventory();
+      } else if (currentTab === 'reorder') {
+        container.innerHTML = renderReorder();
+      } else if (currentTab === 'history') {
+        container.innerHTML = renderHistory();
+      } else if (currentTab === 'settings') {
+        container.innerHTML = renderSettings();
+      }
+    }
+
+    function renderInventory() {
+      const areaItems = currentArea === 'ALL'
+        ? state.items
+        : state.items.filter(i => i.area === currentArea);
+      const lowCount = areaItems.filter(i => Number(i.stock) <= Number(i.minStock)).length;
+      const noCodeCount = areaItems.filter(i => i.code.startsWith('SIN-')).length;
+      const list = getFilteredItems();
+
+      return `
+        <div class="stats-grid">
+          <div class="stat-card">
+            <small>Artículos</small>
+            <strong>${areaItems.length}</strong>
+          </div>
+          <div class="stat-card">
+            <small>Stock Bajo</small>
+            <strong style="color:${lowCount > 0 ? 'var(--danger)' : 'var(--success)'}">${lowCount}</strong>
+          </div>
+          <div class="stat-card">
+            <small>Sin Código</small>
+            <strong>${noCodeCount}</strong>
+          </div>
+        </div>
+
+        <div class="quick-bar">
+          <input class="search-input" type="text" placeholder="Buscar por nombre o código..." value="${escapeHtml(searchQuery)}" oninput="searchQuery=this.value;render();" />
+          <button class="btn-ghost ${onlyNoCode ? 'chip selected' : ''}" onclick="onlyNoCode=!onlyNoCode;render();">Sin código</button>
+          <button class="btn-ghost" onclick="quickCreateNoCode()">+ Sin cód.</button>
+        </div>
+
+        <div class="item-list">
+          ${list.length ? list.map(renderItemCard).join('') : `
+            <div class="empty-state">
+              <p>No hay artículos que coincidan con el filtro.</p>
+              <button class="btn-primary" onclick="openItemModal()">+ Agregar artículo</button>
+            </div>
+          `}
+        </div>
+      `;
+    }
+
+    function renderItemCard(item) {
+      const isLow = Number(item.stock) <= Number(item.minStock);
+      const isSin = item.code.startsWith('SIN-');
+      return `
+        <div class="item-card ${isLow ? 'low-stock' : ''}">
+          <div class="item-top">
+            <div>
+              <h3 class="item-title">${escapeHtml(item.name)}</h3>
+              <div class="item-meta">
+                <span class="pill">${escapeHtml(item.area)}</span>
+                <span class="pill">${isSin ? 'Sin código (' + escapeHtml(item.code) + ')' : 'Cód: ' + escapeHtml(item.code)}</span>
+                <span class="pill">Mín: ${formatNum(item.minStock)} ${escapeHtml(item.unit)}</span>
+                ${isLow ? '<span class="pill pill-warn">Reponer</span>' : ''}
+              </div>
+            </div>
+            <div class="stock-box">
+              <div class="stock-num" style="color:${isLow ? '#fca5a5' : 'var(--text)'}">${formatNum(item.stock)}</div>
+              <div class="stock-unit">${escapeHtml(item.unit)}</div>
+            </div>
+          </div>
+
+          <div class="item-actions">
+            <button class="btn-success" onclick="openMoveModal('${item.id}', 'IN')">+ Entrada</button>
+            <button class="btn-danger" onclick="requestOutMove('${item.id}')">- Salida</button>
+            <button class="btn-ghost" onclick="requestEditItem('${item.id}')">Editar</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderReorder() {
+      const lowItems = state.items.filter(i => Number(i.stock) <= Number(i.minStock));
+      return `
+        <div class="section-card">
+          <h3>Lista de Reposición (${lowItems.length})</h3>
+          <p style="margin:0;color:var(--muted);font-size:13px;">
+            Artículos que están en su stock mínimo o por debajo.
+          </p>
+        </div>
+        <div class="item-list">
+          ${lowItems.length ? lowItems.map(renderItemCard).join('') : `
+            <div class="empty-state">Todo el inventario está por encima de su stock mínimo.</div>
+          `}
+        </div>
+      `;
+    }
+
+    function renderHistory() {
+      return `
+        <div class="section-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+            <div>
+              <h3>Historial de Movimientos</h3>
+              <p style="margin:0;color:var(--muted);font-size:12px;">Entradas, salidas, unidades y motivos registrados.</p>
+            </div>
+            ${state.history.length ? `<button class="btn-ghost" onclick="requestClearHistory()">Limpiar</button>` : ''}
+          </div>
+        </div>
+        <div class="item-list">
+          ${state.history.length ? state.history.map(h => `
+            <div class="history-item">
+              <div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <span class="${h.type === 'IN' ? 'badge-in' : 'badge-out'}">${h.type === 'IN' ? 'ENTRADA' : 'SALIDA'}</span>
+                  <strong>${escapeHtml(h.itemName)}</strong>
+                  <span class="pill">${escapeHtml(h.area)}</span>
+                </div>
+                <div style="font-size:12px;color:var(--muted);margin-top:5px;">
+                  Motivo: <strong style="color:var(--text)">${escapeHtml(h.reason || 'Sin motivo')}</strong>${h.note ? ' — ' + escapeHtml(h.note) : ''}
+                </div>
+                <div style="font-size:11px;color:var(--muted);margin-top:3px;">
+                  ${escapeHtml(h.dateStr)} • Stock: ${formatNum(h.prevStock)} → ${formatNum(h.newStock)} ${escapeHtml(h.unit)}
+                </div>
+              </div>
+              <div style="text-align:right;white-space:nowrap;">
+                <strong style="font-size:16px;color:${h.type === 'IN' ? 'var(--success)' : '#fca5a5'}">
+                  ${h.type === 'IN' ? '+' : '-'}${formatNum(h.qty)}
+                </strong>
+                <div style="font-size:11px;color:var(--muted);">${escapeHtml(h.unit)}</div>
+              </div>
+            </div>
+          `).join('') : `
+            <div class="empty-state">Aún no hay entradas ni salidas registradas.</div>
+          `}
+        </div>
+      `;
+    }
+
+    function renderSettings() {
+      return `
+        <div class="section-card">
+          <h3>PIN de Seguridad (Opcional)</h3>
+          <p style="margin:0 0 10px;color:var(--muted);font-size:13px;">
+            Protege salidas, ediciones y eliminaciones con un PIN de 4 dígitos.
+          </p>
+          <div class="form-group" style="margin-bottom:8px;">
+            <input type="password" id="newPinField" maxlength="4" inputmode="numeric" placeholder="Nuevo PIN de 4 dígitos" value="${escapeHtml(state.pin)}" />
+          </div>
+          <div class="row-actions">
+            <button class="btn-primary" onclick="savePin()">Guardar PIN</button>
+            ${state.pin ? `<button class="btn-ghost" onclick="disablePin()">Quitar PIN</button>` : ''}
+          </div>
+        </div>
+
+        <div class="section-card">
+          <h3>Respaldo y Exportación</h3>
+          <p style="margin:0;color:var(--muted);font-size:13px;">
+            Guarda una copia de seguridad en CSV (para Excel/Hojas de cálculo) o JSON.
+          </p>
+          <div class="row-actions">
+            <button class="btn-ghost" onclick="exportCSV()">Exportar CSV</button>
+            <button class="btn-ghost" onclick="exportJSON()">Respaldo JSON</button>
+            <button class="btn-ghost" onclick="document.getElementById('importJsonInput').click()">Restaurar JSON</button>
+            <input type="file" id="importJsonInput" accept=".json" style="display:none" onchange="importJSON(event)" />
+          </div>
+        </div>
+      `;
+    }
+
+    function openMoveModal(itemId, type) {
+      const item = state.items.find(i => i.id === itemId);
+      if (!item) return;
+      moveContext = { itemId, type };
+
+      const isIn = type === 'IN';
+      document.getElementById('moveTitle').textContent = isIn ? `Entrada: ${item.name}` : `Salida: ${item.name}`;
+      document.getElementById('moveSubtitle').textContent = `Disponible actual: ${formatNum(item.stock)} ${item.unit} (${item.area})`;
+      document.getElementById('moveActionWord').textContent = isIn ? 'sumar' : 'restar';
+      document.getElementById('moveQty').value = '1';
+      document.getElementById('moveNote').value = '';
+
+      const confirmBtn = document.getElementById('confirmMoveBtn');
+      confirmBtn.className = isIn ? 'btn-success' : 'btn-danger';
+      confirmBtn.textContent = isIn ? 'Registrar Entrada' : 'Registrar Salida';
+
+      const isWeightOrVol = ['lb', 'kg', 'L'].includes(item.unit);
+      const steps = isWeightOrVol ? [0.5, 1, 5, 10] : [1, 2, 5, 10];
+      document.getElementById('qtyQuickButtons').innerHTML = steps.map(v =>
+        `<button type="button" class="chip" onclick="document.getElementById('moveQty').value='${v}'">+${v}</button>`
+      ).join('');
+
+      const reasons = isIn ? IN_REASONS : OUT_REASONS;
+      selectedReason = reasons[0];
+      document.getElementById('reasonChips').innerHTML = reasons.map((r, idx) =>
+        `<button type="button" class="chip ${idx === 0 ? 'selected' : ''}" onclick="pickReason(this, '${escapeJs(r)}')">${escapeHtml(r)}</button>`
+      ).join('');
+
+      openModal('moveModal');
+    }
+
+    function pickReason(el, reason) {
+      selectedReason = reason;
+      document.querySelectorAll('#reasonChips .chip').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function confirmMove() {
+      if (!moveContext) return;
+      const qty = parseFloat(document.getElementById('moveQty').value);
+      if (isNaN(qty) || qty <= 0) {
+        alert('Ingresa una cantidad mayor a cero.');
+        return;
+      }
+
+      const item = state.items.find(i => i.id === moveContext.itemId);
+      if (!item) return;
+
+      const prevStock = Number(item.stock);
+      let newStock = moveContext.type === 'IN' ? prevStock + qty : prevStock - qty;
+
+      if (newStock < 0) {
+        alert(`No hay suficiente stock (${formatNum(prevStock)} ${item.unit} disponibles).`);
+        return;
+      }
+
+      item.stock = Number(newStock.toFixed(3));
+      const note = document.getElementById('moveNote').value.trim();
+
+      state.history.unshift({
+        id: String(Date.now()) + Math.random().toString(16).slice(2, 6),
+        itemId: item.id,
+        itemName: item.name,
+        area: item.area,
+        unit: item.unit,
+        type: moveContext.type,
+        qty,
+        prevStock,
+        newStock: item.stock,
+        reason: selectedReason || (moveContext.type === 'IN' ? IN_REASONS[0] : OUT_REASONS[0]),
+        note,
+        dateStr: new Date().toLocaleString('es')
+      });
+
+      if (state.history.length > 500) state.history.length = 500;
+
+      saveState();
+      closeModal('moveModal');
+      moveContext = null;
+      render();
+    }
+
+    function requestOutMove(itemId) {
+      requirePin(() => openMoveModal(itemId, 'OUT'), 'Autorizar Salida', 'Ingresa el PIN para registrar una salida.');
+    }
+
+    function requestEditItem(itemId) {
+      requirePin(() => openItemModal(itemId), 'Autorizar Edición', 'Ingresa el PIN para editar el artículo.');
+    }
+
+    function openItemModal(itemId = null, presetCode = '') {
+      editingItemId = itemId;
+      const defaultArea = currentArea === 'ALL' ? 'Almacén Artículos' : currentArea;
+
+      if (itemId) {
+        const item = state.items.find(i => i.id === itemId);
+        if (!item) return;
+        document.getElementById('itemModalTitle').textContent = 'Editar Artículo';
+        document.getElementById('itemName').value = item.name;
+        document.getElementById('itemArea').value = item.area;
+        document.getElementById('itemUnit').value = item.unit || 'ud.';
+        document.getElementById('itemCode').value = item.code || '';
+        document.getElementById('itemStockLabel').textContent = 'Stock actual';
+        document.getElementById('itemStock').value = item.stock;
+        document.getElementById('itemMin').value = item.minStock;
+      } else {
+        document.getElementById('itemModalTitle').textContent = 'Nuevo Artículo';
+        document.getElementById('itemName').value = '';
+        document.getElementById('itemArea').value = defaultArea;
+        document.getElementById('itemUnit').value = 'ud.';
+        document.getElementById('itemCode').value = presetCode;
+        document.getElementById('itemStockLabel').textContent = 'Stock inicial';
+        document.getElementById('itemStock').value = '0';
+        document.getElementById('itemMin').value = '5';
+      }
+      openModal('itemModal');
+    }
+
+    function quickCreateNoCode() {
+      openItemModal(null, generateSinCode());
+    }
+
+    function assignNoCode() {
+      document.getElementById('itemCode').value = generateSinCode();
+    }
+
+    function generateSinCode() {
+      let num;
+      do {
+        num = Math.floor(1000 + Math.random() * 9000);
+      } while (state.items.some(i => i.code === `SIN-${num}`));
+      return `SIN-${num}`;
+    }
+
+    function saveItem() {
+      const name = document.getElementById('itemName').value.trim();
+      const area = document.getElementById('itemArea').value;
+      const unit = document.getElementById('itemUnit').value;
+      let code = document.getElementById('itemCode').value.trim();
+      const stock = parseFloat(document.getElementById('itemStock').value);
+      const minStock = parseFloat(document.getElementById('itemMin').value);
+
+      if (!name) {
+        alert('Escribe el nombre del artículo.');
+        return;
+      }
+      if (!code) {
+        code = generateSinCode();
+      }
+      const cleanStock = isNaN(stock) || stock < 0 ? 0 : stock;
+      const cleanMin = isNaN(minStock) || minStock < 0 ? 0 : minStock;
+
+      if (editingItemId) {
+        const idx = state.items.findIndex(i => i.id === editingItemId);
+        if (idx !== -1) {
+          state.items[idx] = { ...state.items[idx], name, area, unit, code, stock: cleanStock, minStock: cleanMin };
+        }
+      } else {
+        state.items.unshift({
+          id: String(Date.now()) + Math.random().toString(16).slice(2, 6),
+          name,
+          area,
+          unit,
+          code,
+          stock: cleanStock,
+          minStock: cleanMin
+        });
+      }
+
+      saveState();
+      closeModal('itemModal');
+      editingItemId = null;
+      render();
+    }
+
+    async function openScanner() {
+      openModal('scanModal');
+      if (!window.Html5Qrcode) {
+        document.getElementById('scanHint').textContent = 'No se cargó la librería del escáner. Verifica tu conexión.';
+        return;
+      }
+      try {
+        html5QrCode = new Html5Qrcode('reader');
+        await html5QrCode.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 240, height: 160 } },
+          onScanSuccess,
+          () => {}
+        );
+      } catch (err) {
+        document.getElementById('scanHint').textContent = 'No se pudo abrir la cámara. Revisa los permisos del navegador/app.';
+      }
+    }
+
+    async function onScanSuccess(decodedText) {
+      const code = String(decodedText || '').trim();
+      if (!code) return;
+      await closeScanner();
+
+      const found = state.items.find(i => i.code.toLowerCase() === code.toLowerCase());
+      if (found) {
+        openMoveModal(found.id, 'IN');
+      } else {
+        openItemModal(null, code);
+      }
+    }
+
+    async function closeScanner() {
+      if (html5QrCode) {
+        try {
+          if (html5QrCode.isScanning) {
+            await html5QrCode.stop();
+          }
+          await html5QrCode.clear();
+        } catch {}
+        html5QrCode = null;
+      }
+      closeModal('scanModal');
+    }
+
+    function savePin() {
+      const val = document.getElementById('newPinField').value.trim();
+      if (!/^\d{4}$/.test(val)) {
+        alert('El PIN debe tener exactamente 4 números.');
+        return;
+      }
+      state.pin = val;
+      saveState();
+      alert('PIN guardado.');
+      render();
+    }
+
+    function disablePin() {
+      requirePin(() => {
+        state.pin = '';
+        saveState();
+        alert('PIN desactivado.');
+        render();
+      }, 'Desactivar PIN', 'Ingresa el PIN actual para quitarlo.');
+    }
+
+    function requestClearHistory() {
+      requirePin(() => {
+        if (!confirm('¿Borrar todo el historial de movimientos?')) return;
+        state.history = [];
+        saveState();
+        render();
+      }, 'Borrar Historial', 'Ingresa el PIN para limpiar el historial.');
+    }
+
+    function exportCSV() {
+      const rows = [
+        ['Fecha', 'Tipo', 'Articulo', 'Area', 'Cantidad', 'Unidad', 'Stock Anterior', 'Stock Final', 'Motivo', 'Detalle'],
+        ...state.history.map(h => [
+          h.dateStr,
+          h.type === 'IN' ? 'Entrada' : 'Salida',
+          h.itemName,
+          h.area,
+          h.qty,
+          h.unit,
+          h.prevStock,
+          h.newStock,
+          h.reason || '',
+          h.note || ''
+        ])
+      ];
+      const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+      downloadFile('control-movimientos.csv', 'text/csv;charset=utf-8;', '\uFEFF' + csv);
+    }
+
+    function exportJSON() {
+      downloadFile('control-respaldo.json', 'application/json', JSON.stringify(state, null, 2));
+    }
+
+    function importJSON(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          if (!Array.isArray(parsed.items)) {
+            alert('Archivo de respaldo no válido.');
+            return;
+          }
+          state = {
+            pin: parsed.pin || '',
+            items: parsed.items,
+            history: Array.isArray(parsed.history) ? parsed.history : []
+          };
+          saveState();
+          alert('Respaldo restaurado.');
+          render();
+        } catch {
+          alert('No se pudo leer el archivo JSON.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function downloadFile(filename, mime, content) {
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function escapeJs(str) {
+      return String(str ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    render();
+  </script>
+</body>
+</html>
